@@ -171,16 +171,97 @@ public class Partida implements Serializable {
         }
     }
 
-    //SEGUIR CON LA RESPUESTA AL DESEMPATE Y DEMASES
+    //SEGUIR CON LA RESPUESTA AL DESEMPATE
+    public synchronized void SolucionEmpate(int idJugador, boolean quiereRepartir) {
+        if (!jugadoresEmpatadosIds.contains(idJugador)) {
+            throw new IllegalStateException("No participás de este empate.");
+        }
 
+        if (!quiereRepartir) {
+            estado = EstadoDePartida.JUGANDO;           //si uno se niega, desempate
+            indiceTurno = 0;
+            prepararRonda();
+            notificacion(EventoEnJuego.CAMBIA_TURNO);
+            return;
+        }
+
+        decisionesEmpate.put(idJugador, true);
+
+        // Si todos los empatados eligieron repartir
+        if (decisionesEmpate.size() == jugadoresEmpatadosIds.size()) {
+            int parte = pozo / jugadoresEmpatadosIds.size();
+            int resto = pozo % jugadoresEmpatadosIds.size();
+            for (int i = 0; i < jugadoresEmpatadosIds.size(); i++) {
+                Jugador j = getJugadorPorId(jugadoresEmpatadosIds.get(i));
+                if (j != null) {
+                    j.sumarFichas(parte + (i == 0 ? resto : 0));
+                }
+            }
+            pozo = 0;
+            verificar_FinPartida_NuevaRonda();
+        }
+    }
+
+    //VERIFICA SI HAY MAS DE 1 JUGADOR CON FICHAS
+    private void verificar_FinPartida_NuevaRonda() {
+        long jugadoresQueTienenFichas = jugadores.stream()
+                .filter(j -> j.getCantidadFichas() > 0)
+                .count();
+
+        if(jugadores.size() > 1 && jugadoresQueTienenFichas <= 1){
+            estado = EstadoDePartida.FIN_PARTIDA;
+            notificacion(EventoEnJuego.PARTIDA_FINALIZADA);
+        }else{
+            estado = EstadoDePartida.JUGANDO;
+            indiceTurno = 0;
+            prepararRonda();
+            notificacion(EventoEnJuego.RONDA_FINALIZADA);
+        }
+    }
+
+    private void validarTurno(int idJugador) {
+        if(estado != EstadoDePartida.JUGANDO){
+            throw new IllegalStateException("no inicio la partida");
+        }
+        Jugador actual = getJugadorActual();
+        if(actual == null || actual.getIdJugador() != idJugador){
+            throw new IllegalStateException("No tu turno");
+        }
+    }
+
+    //GETTERS / SETTERS
+    private Jugador getJugadorPorId(Integer id) {
+        return jugadores.stream().filter(j -> j.getIdJugador() == id).findFirst().orElse(null);
+    }
 
     public Jugador getJugadorActual() {
         return jugadores.get(indiceTurno);
     }
 
-
-    private void validarTurno(int idJugador) {
+    public EstadoDePartida getEstado() {
+        return estado;
     }
+
+    public List<Jugador> getJugadores() {
+        return List.copyOf(jugadores);
+    }
+
+    public Cubo getCubo() {
+        return cubo;
+    }
+
+    public Dado[] getDados() {
+        return cubo.getDados();
+    }
+
+    public int getPozo() {
+        return pozo;
+    }
+
+    public int getTirosEnTurno() {
+        return tirosEnTurno;
+    }
+
 
 
     private void notificacion(EventoEnJuego evento) {
@@ -188,6 +269,4 @@ public class Partida implements Serializable {
         //    obs.actualizar(evento);
         //}
     }
-
-
 }
