@@ -10,9 +10,13 @@ public class Jugador implements Serializable {
     private int puntajeJugador;
     private ResultadoTirada ultimaJugada;
     private int cantidadFichas;
+    private final Cubo cubo;                //cubo secreto, antes solo habia un cubo general
+    private int aporteEnVuelta;             //se fija si calleo la apuesta o no
+    private boolean activoEnVuelta;         //false si foldeo
 
     public Jugador(String nombreJugador, int idJugador){
         this.nombreJugador = nombreJugador;
+        this.cubo = new Cubo();
         this.puntajeJugador = 0;
         this.cantidadFichas = FICHAS_INICIALES;
         this.idJugador = idJugador;
@@ -40,6 +44,18 @@ public class Jugador implements Serializable {
         return ultimaJugada;
     }
 
+    public Cubo getCubo() {
+        return cubo;
+    }
+
+    public int getAporteEnVuelta(){
+        return aporteEnVuelta;
+    }
+
+    public boolean isActivoEnVuelta() {
+        return activoEnVuelta;
+    }
+
     //SETTERS
     public void setUltimaJugada(ResultadoTirada ultimaJugada) {
         this.ultimaJugada = ultimaJugada;
@@ -65,6 +81,27 @@ public class Jugador implements Serializable {
     public void restarFichas(int fichas) {
         if (fichas > 0) {
             this.cantidadFichas = Math.max(0, this.cantidadFichas - fichas);
+        }
+    }
+
+    //TEMA VUELTAS Y SU APUESTA
+    public void prepararParaVuelta(boolean activo) {
+        this.puntajeJugador = 0;
+        this.ultimaJugada = null;
+        this.aporteEnVuelta = 0;
+        this.activoEnVuelta = activo;
+        this.cubo.desbloquearTodosDados();
+    }
+
+    public void abandonarVuelta() {
+        this.activoEnVuelta = false;        //si abandono igual perdi las fichas apostadas
+    }
+
+    public void registrarAporteVuelta(int monto) {
+        if (monto > 0) {
+            int real = Math.min(monto, this.cantidadFichas);
+            this.restarFichas(real);
+            this.aporteEnVuelta += real;
         }
     }
 }
