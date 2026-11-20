@@ -73,13 +73,14 @@ public class EvaluadorJugadas {
                     segundoPar = i;
                 }
             }
-
-            if (segundoPar > 0) {
-                return new ResultadoTirada("Doble par", 10 + segundoPar + primerPar);
-            } else if (primerPar > 0) {
-                return new ResultadoTirada("Par Simple", 0 + primerPar);
-            }
         }
+
+        if (segundoPar > 0) {
+            return new ResultadoTirada("Doble par", 10 + segundoPar + primerPar);
+        } else if (primerPar > 0) {
+            return new ResultadoTirada("Par Simple", 0 + primerPar);
+        }
+
 
         return new ResultadoTirada("Sin Jugada", 0);
     }

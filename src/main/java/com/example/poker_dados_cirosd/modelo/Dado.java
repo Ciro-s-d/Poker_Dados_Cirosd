@@ -15,7 +15,7 @@ public class Dado implements Serializable{
         this.tirar(); //valor aleatorio
     }
 
-    private void tirar() {
+    public void tirar() {
         if (!bloqueado) {
             this.valor = random.nextInt(6) + 1;
         }
