@@ -2,10 +2,10 @@ package com.example.poker_dados_cirosd.controlador;
 
 import com.example.poker_dados_cirosd.modelo.IObservador;
 import com.example.poker_dados_cirosd.modelo.Jugador;
-import com.example.poker_dados_cirosd.modelo.Partida;       //traigo las clases y la interfaz
+import com.example.poker_dados_cirosd.modelo.Partida;
 import com.example.poker_dados_cirosd.vista.IVista;
 
-public class Controlador implements IObservador {       //con implements recibo la info de actualizar
+public class Controlador implements IObservador {
 
     private final Partida partida;
     private final IVista vista;
@@ -14,18 +14,21 @@ public class Controlador implements IObservador {       //con implements recibo 
     public Controlador(Partida partida, IVista vista) {
         this.partida = partida;
         this.vista = vista;
-        this.partida.agregarObservador(this);   //controlador mira la partida y me dice si cabmia algo
+        this.partida.agregarObservador(this);
     }
 
     public void setIdJugadorLocal(Integer idJugadorLocal) {
-        this.idJugadorLocal = idJugadorLocal;   //separa por jugador
+        this.idJugadorLocal = idJugadorLocal;
     }
 
-    // LAS ACCIONES QUE VIENEN DESDE VISTA Y YO LLAMO A LOS METODOS PARA QUE ME RESPONDAN
+    public Integer getIdJugadorLocal() {
+        return idJugadorLocal;
+    }
+
     public void agregarJugador(String nombre) {
         try {
             Jugador nuevo = partida.agregarJugador(nombre);
-            if (this.idJugadorLocal == null) {
+            if (this.idJugadorLocal == null && nuevo != null) {
                 this.idJugadorLocal = nuevo.getIdJugador();
             }
         } catch (IllegalStateException | IllegalArgumentException e) {
@@ -35,8 +38,11 @@ public class Controlador implements IObservador {       //con implements recibo 
 
     public void iniciarPartida() {
         try {
-            int idSolicitante = (idJugadorLocal != null) ? idJugadorLocal : 1;
-            partida.iniciarPartida(idSolicitante);
+            if (idJugadorLocal == null) {
+                vista.mostrarError("Primero debés unirte a la partida con un nombre.");
+                return;
+            }
+            partida.iniciarPartida(idJugadorLocal);
         } catch (IllegalStateException e) {
             vista.mostrarError(e.getMessage());
         }
@@ -44,53 +50,66 @@ public class Controlador implements IObservador {       //con implements recibo 
 
     public void tirarDados() {
         try {
+            if (!validarJugadorLocal()) return;
             partida.tirarLosDados(idJugadorLocal);
-        } catch (IllegalStateException | NullPointerException e) {
+        } catch (IllegalStateException e) {
             vista.mostrarError(e.getMessage());
         }
     }
 
     public void alternarBloqueoDado(int indiceDado) {
         try {
+            if (!validarJugadorLocal()) return;
             partida.bloqueoDeDados(idJugadorLocal, indiceDado);
-        } catch (IllegalStateException | IllegalArgumentException | NullPointerException e) {
+        } catch (IllegalStateException | IllegalArgumentException e) {
             vista.mostrarError(e.getMessage());
         }
     }
 
     public void subirApuesta(int nuevaApuestaTotal) {
         try {
+            if (!validarJugadorLocal()) return;
             partida.RaiseTrasTirada(idJugadorLocal, nuevaApuestaTotal);
-        } catch (IllegalStateException | IllegalArgumentException | NullPointerException e) {
+        } catch (IllegalStateException | IllegalArgumentException e) {
             vista.mostrarError(e.getMessage());
         }
     }
 
     public void igualarOAbandonar(boolean quiereIgualar) {
         try {
+            if (!validarJugadorLocal()) return;
             partida.Call_Fold(idJugadorLocal, quiereIgualar);
-        } catch (IllegalStateException | NullPointerException e) {
+        } catch (IllegalStateException e) {
             vista.mostrarError(e.getMessage());
         }
     }
 
     public void plantarse() {
         try {
+            if (!validarJugadorLocal()) return;
             partida.plantarse(idJugadorLocal);
-        } catch (IllegalStateException | NullPointerException e) {
+        } catch (IllegalStateException e) {
             vista.mostrarError(e.getMessage());
         }
     }
 
     public void resolverEmpate(boolean quiereRepartir) {
         try {
+            if (!validarJugadorLocal()) return;
             partida.solucionEmpate(idJugadorLocal, quiereRepartir);
-        } catch (IllegalStateException | NullPointerException e) {
+        } catch (IllegalStateException e) {
             vista.mostrarError(e.getMessage());
         }
     }
 
-    // ESTAS SON LAS REACCIONES QUE TENGO A LO QUE ME DICE "MODELO" (Le aviso a vista que actualice)
+    private boolean validarJugadorLocal() {
+        if (idJugadorLocal == null) {
+            vista.mostrarError("No hay un jugador local identificado.");
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public void actualizar(Partida.EventoEnJuego evento) {
         switch (evento) {
