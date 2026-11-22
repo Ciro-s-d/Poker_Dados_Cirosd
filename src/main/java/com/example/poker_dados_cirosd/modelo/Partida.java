@@ -3,7 +3,7 @@ package com.example.poker_dados_cirosd.modelo;
 import java.io.Serializable;
 import java.util.*;
 
-public class Partida implements Serializable {
+public class Partida implements IObservable, Serializable {
 
     public enum EstadoDePartida{
         SALA,
@@ -23,7 +23,19 @@ public class Partida implements Serializable {
         JUGADOR_ABANDONO
     }
 
-    //private final List<IObservable> observadores = new ArrayList<>();
+    private final transient List<IObservador> observadores = new ArrayList<>();
+
+    @Override                   //necesario implementar observadores
+    public void agregarObservador(IObservador observador) {
+        if (observador != null && !observadores.contains(observador)) {
+            observadores.add(observador);
+        }
+    }
+
+    @Override
+    public void quitarObservador(IObservador observador) {
+        observadores.remove(observador);
+    }
 
     //INICIO DE PARETIDA, CREO LO QUE NECESITO
     private EstadoDePartida estado = EstadoDePartida.SALA;
@@ -311,7 +323,7 @@ public class Partida implements Serializable {
             }
             notificacion(EventoEnJuego.RONDA_FINALIZADA);
         } else {
-            // Corrección respecto al borrador: antes faltaba pagar el pozo y avanzar/terminar partida cuando había un solo ganador
+            //antes faltaba pagar el pozo y avanzar/terminar partida cuando había un solo ganador
             empatados.get(0).sumarFichas(pozo);
             pozo = 0;
             nuevoTurno_ResultadoRonda();
@@ -444,9 +456,9 @@ public class Partida implements Serializable {
     }
 
     private void notificacion(EventoEnJuego evento) {
-        //for (IObservador obs : observadores) {
-        //    obs.actualizar(evento);}
-
+        for (IObservador obs : observadores) {
+            obs.actualizar(evento);
+        }
     }
 
 }
