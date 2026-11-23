@@ -142,4 +142,14 @@ public class Controlador implements IObservador {
                 partida.isDadosRevelados()
         );
     }
+
+    public int getTirosEnTurno() {
+        return partida.getTirosEnTurno();
+    }
+
+    public void abandonarPartida() {
+        if (vista != null) {
+            vista.mostrarMenu();
+        }
+    }
 }

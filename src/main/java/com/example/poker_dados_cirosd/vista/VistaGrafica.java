@@ -2,7 +2,9 @@ package com.example.poker_dados_cirosd.vista;
 
 import com.example.poker_dados_cirosd.controlador.Controlador;
 import com.example.poker_dados_cirosd.controlador.menuControlador;
+import com.example.poker_dados_cirosd.controlador.mesaControlador;
 import com.example.poker_dados_cirosd.controlador.salaControlador;
+import com.example.poker_dados_cirosd.controlador.finPartidaControlador;
 import com.example.poker_dados_cirosd.modelo.Dado;
 import com.example.poker_dados_cirosd.modelo.Jugador;
 import com.example.poker_dados_cirosd.modelo.Partida;
@@ -19,11 +21,16 @@ import java.util.List;
 
 public class VistaGrafica implements IVista {
 
+    private List<Jugador> ultimosJugadores;
+
     private final Stage stage;
     private Controlador controlador;
 
     private salaControlador ctrlSala;
     private boolean salaCargada = false;
+
+    private mesaControlador ctrlMesa;
+    private boolean mesaCargada = false;
 
     public VistaGrafica(Stage stage) {
         this.stage = stage;
@@ -31,6 +38,9 @@ public class VistaGrafica implements IVista {
 
     public void setControlador(Controlador controlador) {
         this.controlador = controlador;
+        if (this.ctrlMesa != null) {
+            this.ctrlMesa.setControlador(controlador);
+        }
     }
 
     @Override
@@ -48,6 +58,8 @@ public class VistaGrafica implements IVista {
                 establecerEscena(root, "Póker de Dados - Menú");
                 salaCargada = false;
                 ctrlSala = null;
+                mesaCargada = false;
+                ctrlMesa = null;
             } catch (IOException e) {
                 mostrarError("No se pudo cargar menu.fxml: " + e.getMessage());
             }
@@ -91,6 +103,7 @@ public class VistaGrafica implements IVista {
             Dado[] dadosVisibles,
             boolean dadosRevelados
     ) {
+        this.ultimosJugadores = jugadores;
         Platform.runLater(() -> {
             URL urlMesa = getClass().getResource("/fxml/mesa.fxml");
             if (urlMesa == null) {
@@ -99,16 +112,43 @@ public class VistaGrafica implements IVista {
             }
 
             try {
-                FXMLLoader loader = new FXMLLoader(urlMesa);
-                Parent root = loader.load();
-                establecerEscena(root, "Póker de Dados - Mesa");
-                salaCargada = false;
-                ctrlSala = null;
+                if (!mesaCargada || ctrlMesa == null) {
+                    FXMLLoader loader = new FXMLLoader(urlMesa);
+                    Parent root = loader.load();
+
+                    ctrlMesa = loader.getController();
+                    if (ctrlMesa != null && controlador != null) {
+                        ctrlMesa.setControlador(controlador);
+                    }
+
+                    establecerEscena(root, "Póker de Dados - Mesa");
+                    salaCargada = false;
+                    ctrlSala = null;
+                    mesaCargada = true;
+                }
+
+                if (ctrlMesa != null) {
+                    Jugador jugadorLocal = obtenerJugadorLocal(jugadores);
+                    if (jugadorLocal != null) {
+                        ctrlMesa.setJugadorLocal(jugadorLocal);
+                    }
+                    ctrlMesa.actualizarMesa(
+                            estado,
+                            pozo,
+                            apuestaMaximaActual,
+                            jugadorActual,
+                            jugadores,
+                            dadosVisibles,
+                            dadosRevelados
+                    );
+                }
             } catch (IOException e) {
                 mostrarError("No se pudo cargar mesa.fxml: " + e.getMessage());
             }
         });
     }
+
+
 
     @Override
     public void mostrarResultadoRonda(String mensaje) {
@@ -117,7 +157,26 @@ public class VistaGrafica implements IVista {
 
     @Override
     public void mostrarFinPartida(String mensaje) {
-        Platform.runLater(() -> mostrarInfo(mensaje));
+        Platform.runLater(() -> {
+            try {
+                FXMLLoader loader = cargarFXML("/fxml/finPartida.fxml");
+                Parent root = loader.load();
+
+                finPartidaControlador ctrlFin = loader.getController();
+                if (ctrlFin != null) {
+                    ctrlFin.setControlador(controlador);
+                    ctrlFin.mostrarGanador(ultimosJugadores);
+                }
+
+                establecerEscena(root, "Póker de Dados - Fin de Partida");
+                salaCargada = false;
+                ctrlSala = null;
+                mesaCargada = false;
+                ctrlMesa = null;
+            } catch (IOException e) {
+                mostrarError("No se pudo cargar finPartida.fxml: " + e.getMessage());
+            }
+        });
     }
 
     @Override
@@ -149,6 +208,8 @@ public class VistaGrafica implements IVista {
 
     private void establecerEscena(Parent root, String titulo) {
         stage.setTitle(titulo);
+        stage.setMinWidth(920);
+        stage.setMinHeight(680);
         if (stage.getScene() == null) {
             stage.setScene(new Scene(root));
         } else {
@@ -157,16 +218,21 @@ public class VistaGrafica implements IVista {
         stage.show();
     }
 
-    private String obtenerNombreJugadorLocal(List<Jugador> jugadores) {
+    private Jugador obtenerJugadorLocal(List<Jugador> jugadores) {
         if (controlador == null || controlador.getIdJugadorLocal() == null || jugadores == null) {
-            return "";
+            return null;
         }
         int idLocal = controlador.getIdJugadorLocal();
         for (Jugador j : jugadores) {
             if (j.getIdJugador() == idLocal) {
-                return j.getnombreJugador();
+                return j;
             }
         }
-        return "";
+        return null;
+    }
+
+    private String obtenerNombreJugadorLocal(List<Jugador> jugadores) {
+        Jugador local = obtenerJugadorLocal(jugadores);
+        return (local != null) ? local.getnombreJugador() : "";
     }
 }

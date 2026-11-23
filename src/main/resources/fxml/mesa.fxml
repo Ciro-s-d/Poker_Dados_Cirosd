@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<StackPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.example.poker_dados_cirosd.controlador.mesaControlador"
+           alignment="CENTER">
+   <children>
+      <AnchorPane maxHeight="652.0" maxWidth="913.0" minHeight="652.0" minWidth="913.0" prefHeight="652.0" prefWidth="913.0">
+         <children>
+            <Button fx:id="btnTirar" layoutX="401.0" layoutY="479.0" mnemonicParsing="false" onAction="#onTirar" prefHeight="25.0" prefWidth="80.0" text="TIRAR" />
+            <Button fx:id="btnRetirarse" layoutX="256.0" layoutY="559.0" mnemonicParsing="false" onAction="#onRetirarse" prefHeight="25.0" prefWidth="80.0" text="Retirarse" />
+            <Button fx:id="btnSubir" layoutX="401.0" layoutY="559.0" mnemonicParsing="false" onAction="#onAbrirSubir" prefHeight="25.0" prefWidth="80.0" text="Subir" />
+            <Button fx:id="btnIgualar" layoutX="560.0" layoutY="559.0" mnemonicParsing="false" onAction="#onIgualar" prefHeight="25.0" prefWidth="80.0" text="Igualar" />
+            <Button fx:id="btnAbandonarPartida" layoutX="770.0" layoutY="601.0" mnemonicParsing="false" onAction="#onAbandonarPartida" text="Abandonar partida" />
+            <Label fx:id="lblEsTuTurno" layoutX="393.0" layoutY="118.0" text="ES TU TURNO!">
+               <font>
+                  <Font size="15.0" />
+               </font>
+            </Label>
+            <Label fx:id="lblCantidadFichas" layoutX="44.0" layoutY="496.0" prefHeight="17.0" prefWidth="146.0" text="Cantidad de fichas: " />
+            <Label fx:id="lblApuestaMaxima" layoutX="124.0" layoutY="232.0" prefHeight="17.0" prefWidth="116.0" text="Apuesta maxima:" />
+            <HBox fx:id="cardJugador0" layoutX="24.0" layoutY="14.0" prefHeight="75.0" prefWidth="200.0" style="-fx-background-color: gray;">
+               <children>
+                  <ImageView fx:id="imgJugador0" fitHeight="75.0" fitWidth="72.0" pickOnBounds="true" preserveRatio="true" style="-fx-cursor: red;" />
+                  <VBox fx:id="VboxJugador0" prefHeight="75.0" prefWidth="128.0">
+                     <children>
+                        <Label fx:id="lblNombreJugador0" text="Nombre" />
+                        <Label fx:id="lblFichasJugador0" text="Fichas:" />
+                        <Label fx:id="lblApuestaJugador0" text="Apuesta en ronda:" />
+                        <Label fx:id="lblJugadaJugador0" text="ultima jugada:" />
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+            <HBox fx:id="cardJugador1" layoutX="242.0" layoutY="14.0" prefHeight="75.0" prefWidth="200.0" style="-fx-background-color: gray;">
+               <children>
+                  <ImageView fx:id="imgJugador1" fitHeight="75.0" fitWidth="72.0" pickOnBounds="true" preserveRatio="true" style="-fx-cursor: red;" />
+                  <VBox fx:id="VboxJugador1" prefHeight="75.0" prefWidth="128.0">
+                     <children>
+                        <Label fx:id="lblNombreJugador1" text="Nombre" />
+                        <Label fx:id="lblFichasJugador1" text="Fichas:" />
+                        <Label fx:id="lblApuestaJugador1" text="Apuesta en ronda:" />
+                        <Label fx:id="lblJugadaJugador1" text="ultima jugada:" />
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+            <HBox fx:id="cardJugador2" layoutX="467.0" layoutY="14.0" prefHeight="75.0" prefWidth="200.0" style="-fx-background-color: gray;">
+               <children>
+                  <ImageView fx:id="imgJugador2" fitHeight="75.0" fitWidth="72.0" pickOnBounds="true" preserveRatio="true" style="-fx-cursor: red;" />
+                  <VBox prefHeight="75.0" prefWidth="128.0">
+                     <children>
+                        <Label fx:id="lblNombreJugador2" text="Nombre" />
+                        <Label fx:id="lblFichasJugador2" text="Fichas:" />
+                        <Label fx:id="lblApuestaJugador2" text="Apuesta en ronda:" />
+                        <Label fx:id="lblJugadaJugador2" text="ultima jugada:" />
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+            <HBox fx:id="cardJugador3" layoutX="686.0" layoutY="14.0" prefHeight="75.0" prefWidth="200.0" style="-fx-background-color: gray;">
+               <children>
+                  <ImageView fx:id="imgJugador3" fitHeight="75.0" fitWidth="72.0" pickOnBounds="true" preserveRatio="true" style="-fx-cursor: red;" />
+                  <VBox fx:id="VboxJugador3" prefHeight="75.0" prefWidth="128.0">
+                     <children>
+                        <Label fx:id="lblNombreJugador3" text="Nombre" />
+                        <Label fx:id="lblFichasJugador3" text="Fichas:" />
+                        <Label fx:id="lblApuestaJugador3" text="Apuesta en ronda:" />
+                        <Label fx:id="lblJugadaJugador3" text="ultima jugada:" />
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+            <Button fx:id="btnDado0" layoutX="234.0" layoutY="381.0" mnemonicParsing="false" onAction="#onDado0" prefHeight="70.0" prefWidth="70.0" text="DADO1" />
+            <Button fx:id="btnDado1" layoutX="320.0" layoutY="381.0" mnemonicParsing="false" onAction="#onDado1" prefHeight="70.0" prefWidth="70.0" text="DADO2" />
+            <Button fx:id="btnDado2" layoutX="407.0" layoutY="381.0" mnemonicParsing="false" onAction="#onDado2" prefHeight="70.0" prefWidth="70.0" text="DADO3" />
+            <Button fx:id="btnDado4" layoutX="576.0" layoutY="381.0" mnemonicParsing="false" onAction="#onDado4" prefHeight="70.0" prefWidth="70.0" text="DADO5" />
+            <Button fx:id="btnDado3" layoutX="490.0" layoutY="381.0" mnemonicParsing="false" onAction="#onDado3" prefHeight="70.0" prefWidth="70.0" text="DADO4" />
+            <VBox alignment="CENTER" layoutX="342.0" layoutY="149.0" prefHeight="200.0" prefWidth="100.0" style="-fx-background-color: green;">
+               <children>
+                  <ImageView fx:id="imgPozo" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
+                  <Label fx:id="lblPozo" text="POZO:" />
+               </children>
+            </VBox>
+            <Label fx:id="lblTiros" layoutX="490.0" layoutY="483.0" text="Tiros: " />
+            <HBox fx:id="panelSubir" layoutX="300.0" layoutY="513.0" prefHeight="43.0" prefWidth="282.0" style="-fx-background-color: white; -fx-border-color: #888; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8;">
+               <children>
+                  <TextField fx:id="txtMontoSubir" prefHeight="20.0" prefWidth="106.0" style="-fx-border-color: black;" text="Fichas a subir:">
+                     <HBox.margin>
+                        <Insets right="27.0" />
+                     </HBox.margin>
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </TextField>
+                  <Button fx:id="btnConfirmarSubir" mnemonicParsing="false" onAction="#onConfirmarSubir" text="Aceptar">
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                  </Button>
+                  <Button fx:id="btnCancelarSubir" mnemonicParsing="false" onAction="#onCancelarSubir" text="Cancelar" />
+               </children>
+            </HBox>
+            <StackPane fx:id="panelEmpate" layoutX="593.0" layoutY="174.0" prefHeight="150.0" prefWidth="175.0">
+               <children>
+                  <VBox alignment="CENTER" maxHeight="220.0" maxWidth="360.0" prefHeight="150.0" prefWidth="146.0" spacing="14.0">
+                     <children>
+                        <Label fx:id="lblMensajeEmpate" text="EMPATE DE LA RONDA!" />
+                        <HBox alignment="CENTER" prefHeight="30.0" prefWidth="129.0">
+                           <children>
+                              <Button fx:id="btnRepartir" mnemonicParsing="false" onAction="#onRepartir" text="Repartir">
+                                 <HBox.margin>
+                                    <Insets right="20.0" />
+                                 </HBox.margin>
+                              </Button>
+                              <Button fx:id="btnReJugar" mnemonicParsing="false" onAction="#onRejugar" text="Re-Jugar" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </children>
+            </StackPane>
+         </children>
+      </AnchorPane>
+   </children>
+</StackPane>
