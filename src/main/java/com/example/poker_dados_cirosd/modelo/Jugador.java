@@ -104,4 +104,17 @@ public class Jugador implements Serializable {
             this.aporteEnVuelta += real;
         }
     }
+
+    //intento de arreglar RMI
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Jugador other)) return false;
+        return this.idJugador == other.idJugador;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(idJugador);
+    }
 }

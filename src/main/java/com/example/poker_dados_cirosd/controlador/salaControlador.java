@@ -51,14 +51,23 @@ public class salaControlador {
     }
 
     public void actualizarSala(List<Jugador> jugadores, String nombreJugadorLocal) {
+        actualizarSala(jugadores, nombreJugadorLocal, null);
+    }
+
+    public void actualizarSala(List<Jugador> jugadores, String nombreJugadorLocal, Integer idJugadorLocal) {
         if (tablaJugadores != null && jugadores != null) {
             tablaJugadores.setItems(FXCollections.observableArrayList(jugadores));
         }
 
-        // El admin es el primero en la lista (índice 0)
-        boolean esAdmin = jugadores != null
-                && !jugadores.isEmpty()
-                && jugadores.get(0).getnombreJugador().equals(nombreJugadorLocal);
+        boolean esAdmin = false;
+        if (jugadores != null && !jugadores.isEmpty()) {
+            Jugador primero = jugadores.get(0);
+            if (idJugadorLocal != null) {
+                esAdmin = primero.getIdJugador() == idJugadorLocal;
+            } else if (nombreJugadorLocal != null) {
+                esAdmin = primero.getnombreJugador().equals(nombreJugadorLocal);
+            }
+        }
 
         setVisibilidad(btnIniciarPartida, esAdmin);
         setVisibilidad(lblEsperando, !esAdmin);

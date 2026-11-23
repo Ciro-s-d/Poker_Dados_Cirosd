@@ -32,6 +32,8 @@ public class VistaGrafica implements IVista {
     private mesaControlador ctrlMesa;
     private boolean mesaCargada = false;
 
+    private boolean cierreConfigurado = false;
+
     public VistaGrafica(Stage stage) {
         this.stage = stage;
     }
@@ -85,7 +87,8 @@ public class VistaGrafica implements IVista {
 
                 if (ctrlSala != null) {
                     String nombreLocal = obtenerNombreJugadorLocal(jugadores);
-                    ctrlSala.actualizarSala(jugadores, nombreLocal);
+                    Integer idLocal = (controlador != null) ? controlador.getIdJugadorLocal() : null;
+                    ctrlSala.actualizarSala(jugadores, nombreLocal, idLocal);
                 }
             } catch (IOException e) {
                 mostrarError("No se pudo cargar sala.fxml: " + e.getMessage());
@@ -148,8 +151,6 @@ public class VistaGrafica implements IVista {
         });
     }
 
-
-
     @Override
     public void mostrarResultadoRonda(String mensaje) {
         Platform.runLater(() -> mostrarInfo(mensaje));
@@ -191,11 +192,13 @@ public class VistaGrafica implements IVista {
     }
 
     private void mostrarInfo(String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Información");
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        alert.showAndWait();
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Información");
+            alert.setHeaderText(null);
+            alert.setContentText(mensaje);
+            alert.showAndWait();
+        });
     }
 
     private FXMLLoader cargarFXML(String ruta) throws IOException {
@@ -214,6 +217,13 @@ public class VistaGrafica implements IVista {
             stage.setScene(new Scene(root));
         } else {
             stage.getScene().setRoot(root);
+        }
+        if (!cierreConfigurado) {
+            cierreConfigurado = true;
+            stage.setOnCloseRequest(event -> {
+                Platform.exit();
+                System.exit(0);
+            });
         }
         stage.show();
     }

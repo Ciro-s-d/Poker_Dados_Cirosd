@@ -79,8 +79,6 @@ public class menuControlador {
         }
 
         if (controladorMvc != null) {
-            // Conecta con tu Controlador del MVC para registrar el jugador / entrar a la sala:
-            // ajustá el nombre del metodo si en tu Controlador se llama distinto (ej: agregarJugador o unirseASala).
             controladorMvc.agregarJugador(nombreJugador);
         }
     }

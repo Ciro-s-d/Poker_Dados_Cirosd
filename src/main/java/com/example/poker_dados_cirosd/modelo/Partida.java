@@ -1,18 +1,22 @@
 package com.example.poker_dados_cirosd.modelo;
 
+import ar.edu.unlu.rmimvc.observer.ObservableRemoto;
+
 import java.io.Serializable;
+import java.rmi.RemoteException;
 import java.util.*;
 
-public class Partida implements IObservable, Serializable {
+//PARA RMI EXTIENDE observableRemoto e IMPLEMENTA IPartida
+public class Partida extends ObservableRemoto implements IObservable, IPartida, Serializable {
 
-    public enum EstadoDePartida{
+    public enum EstadoDePartida implements Serializable{
         SALA,
         JUGANDO,
         EMPATE_EN_CURSO,
         FIN_PARTIDA
     }
 
-    public enum EventoEnJuego{
+    public enum EventoEnJuego implements Serializable{
         JUGADORES_CAMBIOS,
         INICIA_PARTIDA,
         CAMBIA_TURNO,
@@ -59,15 +63,22 @@ public class Partida implements IObservable, Serializable {
 
 
     //AGREGAR JUGADORES A PARTIDA
-    public synchronized Jugador agregarJugador(String nombre){
-        if(estado != EstadoDePartida.SALA){
+    public synchronized Jugador agregarJugador(String nombre) {
+        if (estado != EstadoDePartida.SALA) {
             throw new IllegalStateException("Partida iniciada. Espere.");
         }
-        if(nombre == null || nombre.isBlank()){
+        if (nombre == null || nombre.isBlank()) {
             throw new IllegalArgumentException("El nombre debe ser valido");
         }
 
-        Jugador nuevo = new Jugador(nombre, siguienteIdJugador++);
+        String nombreLimpio = nombre.trim();
+        for (Jugador j : jugadores) {
+            if (j.getnombreJugador() != null && j.getnombreJugador().equalsIgnoreCase(nombreLimpio)) {
+                throw new IllegalArgumentException("Ya existe un jugador con ese nombre.");
+            }
+        }
+
+        Jugador nuevo = new Jugador(nombreLimpio, siguienteIdJugador++);
         jugadores.add(nuevo);
         notificacion(EventoEnJuego.JUGADORES_CAMBIOS);
         return nuevo;
@@ -418,7 +429,7 @@ public class Partida implements IObservable, Serializable {
     }
 
     public List<Jugador> getJugadores() {
-        return List.copyOf(jugadores);
+        return new ArrayList<>(jugadores);
     }
 
     public int getPozo() {
@@ -456,8 +467,10 @@ public class Partida implements IObservable, Serializable {
     }
 
     private void notificacion(EventoEnJuego evento) {
-        for (IObservador obs : observadores) {
-            obs.actualizar(evento);
+        try {
+            notificarObservadores(evento);
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
     }
 

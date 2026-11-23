@@ -279,10 +279,10 @@ public class mesaControlador {
         }
     }
 
-    // =========================================================
-    // ACCIONES DE EMPATE (On Action de Repartir / Re-Jugarr)
-    // =========================================================
-    // Botón "Repartir" -> On Action: onRepartir
+
+    // ACCIONES DE EMPATE
+
+    // BOTON "Repartir"
     @FXML
     private void onRepartir() {
         if (controlador != null) {
@@ -290,7 +290,7 @@ public class mesaControlador {
         }
     }
 
-    // Botón "Re-Jugarr" -> On Action: onRejugar
+    // BOTON "Re-Jugarr"
     @FXML
     private void onRejugar() {
         if (controlador != null) {
@@ -298,9 +298,8 @@ public class mesaControlador {
         }
     }
 
-    // =========================================================
-    // UTILIDAD PARA OCULTAR/MOSTRAR SIN DEJAR HUECO
-    // =========================================================
+
+    // UTILIDAD PARA OCULTAR/MOSTRAR SIN DEJAR AGUJEROS
     private void setVisibleManaged(javafx.scene.Node nodo, boolean visible) {
         if (nodo != null) {
             nodo.setVisible(visible);

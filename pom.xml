@@ -16,6 +16,14 @@
 
     <dependencies>
         <dependency>
+            <groupId>ar.edu.unlu</groupId>
+            <artifactId>rmimvc</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/LibreriaRMIMVC.jar</systemPath>
+        </dependency>
+
+        <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>21.0.6</version>
@@ -60,6 +68,8 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
+                            <source>21</source>
+                            <target>21</target>
                             <mainClass>com.example.poker_dados_cirosd/com.example.poker_dados_cirosd.HelloApplication
                             </mainClass>
                             <launcher>app</launcher>
