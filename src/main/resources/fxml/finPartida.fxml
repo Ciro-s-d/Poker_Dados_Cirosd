@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.example.poker_dados_cirosd.controlador.finPartidaControlador"
+           alignment="CENTER"
+           style="-fx-background-color: #f4f4f4;">
+    <children>
+        <VBox alignment="CENTER"
+              spacing="24.0"
+              prefWidth="800.0"
+              prefHeight="600.0"
+              minWidth="800.0"
+              minHeight="600.0"
+              maxWidth="800.0"
+              maxHeight="600.0"
+              style="-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-radius: 10; -fx-background-radius: 10;">
+            <padding>
+                <Insets top="30.0" right="30.0" bottom="30.0" left="30.0"/>
+            </padding>
+            <children>
+                <!-- Título -->
+                <Label text="Fin de partida">
+                    <font>
+                        <Font name="System Bold" size="32.0"/>
+                    </font>
+                </Label>
+
+                <!-- Subtítulo -->
+                <Label text="EL GANADOR ES:"
+                       style="-fx-text-fill: #2e7d32;">
+                    <font>
+                        <Font name="System Bold" size="20.0"/>
+                    </font>
+                </Label>
+
+                <!-- Bloque del ganador: [FOTO] [NOMBRE] [FICHAS] -->
+                <HBox alignment="CENTER"
+                      spacing="20.0"
+                      maxWidth="520.0"
+                      style="-fx-background-color: #eeeeee; -fx-border-color: #888888; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 16;">
+                    <children>
+                        <ImageView fx:id="imgGanador"
+                                   fitWidth="90.0"
+                                   fitHeight="90.0"
+                                   preserveRatio="true"/>
+
+                        <VBox alignment="CENTER_LEFT" spacing="6.0">
+                            <children>
+                                <Label fx:id="lblNombreGanador" text="Nombre">
+                                    <font>
+                                        <Font name="System Bold" size="22.0"/>
+                                    </font>
+                                </Label>
+                                <Label fx:id="lblFichasGanador" text="Fichas: 0"
+                                       style="-fx-text-fill: #333333;">
+                                    <font>
+                                        <Font size="18.0"/>
+                                    </font>
+                                </Label>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+
+                <!-- Botón volver al menú -->
+                <Button fx:id="btnVolverMenu"
+                        text="Volver al menu principal"
+                        onAction="#onVolverMenu"
+                        prefHeight="42.0"
+                        prefWidth="220.0"
+                        style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;"/>
+            </children>
+        </VBox>
+    </children>
+</StackPane>
