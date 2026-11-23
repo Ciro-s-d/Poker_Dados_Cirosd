@@ -7,6 +7,7 @@ import com.example.poker_dados_cirosd.modelo.Partida;
 import java.util.List;
 
 public interface IVista {
+    void mostrarMenu();
     void mostrarSala(List<Jugador> jugadores);
     void mostrarMesa(Partida.EstadoDePartida estado, int pozo, int apuestaMaxima,
                      Jugador jugadorActual, List<Jugador> jugadores, Dado[] dadosVisibles,

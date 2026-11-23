@@ -15,6 +15,6 @@ public class HelloApplication extends Application {
         Controlador controlador = new Controlador(partida, vista);
         vista.setControlador(controlador);
 
-        vista.iniciar();
+        vista.mostrarMenu();
     }
 }
