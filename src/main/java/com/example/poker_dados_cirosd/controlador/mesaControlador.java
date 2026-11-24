@@ -104,10 +104,8 @@ public class mesaControlador {
             lblApuestaMaxima.setText("Apuesta maxima: " + apuestaMaxima);
         }
 
-
         Jugador local = (jugadorLocal != null) ? jugadorLocal : jugadorActual;
         if (lblCantidadFichas != null && local != null) {
-
             lblCantidadFichas.setText("Cantidad de fichas: " + local.getCantidadFichas());
         }
 
@@ -130,14 +128,16 @@ public class mesaControlador {
         boolean hayEmpate = (estado == Partida.EstadoDePartida.EMPATE_EN_CURSO);
         setVisibleManaged(panelEmpate, hayEmpate);
 
-        // HABILITA O NO LOS BOTONES SI ES TU TURNO/ HAY EMPATE
+        // HABILITA O NO LOS BOTONES SI ES TU TURNO / HAY EMPATE / SOLO IGUALAR O RETIRARSE
+        boolean soloIgualarORetirarse = (controlador != null) && controlador.isSoloIgualarOAbandonar();
         boolean puedeActuar = esMiTurno && !hayEmpate;
-        if (btnTirar != null) btnTirar.setDisable(!puedeActuar);
-        if (btnRetirarse != null) btnRetirarse.setDisable(!puedeActuar);
-        if (btnSubir != null) btnSubir.setDisable(!puedeActuar);
-        if (btnIgualar != null) btnIgualar.setDisable(!puedeActuar);
 
-        if (!puedeActuar) {
+        if (btnTirar != null) btnTirar.setDisable(!puedeActuar || soloIgualarORetirarse);
+        if (btnSubir != null) btnSubir.setDisable(!puedeActuar || soloIgualarORetirarse);
+        if (btnIgualar != null) btnIgualar.setDisable(!puedeActuar);
+        if (btnRetirarse != null) btnRetirarse.setDisable(!puedeActuar);
+
+        if (!puedeActuar || soloIgualarORetirarse) {
             setVisibleManaged(panelSubir, false);
         }
     }

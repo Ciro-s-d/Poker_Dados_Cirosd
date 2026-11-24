@@ -45,6 +45,8 @@ public class Partida extends ObservableRemoto implements IObservable, IPartida, 
     private EstadoDePartida estado = EstadoDePartida.SALA;
     private final List<Jugador> jugadores = new ArrayList<>();
     private final List<Jugador> participantesVuelta = new ArrayList<>();
+    private boolean faseSoloIgualarOAbandonar = false;
+    private final Set<Integer> jugadoresEnPartidaIds = new LinkedHashSet<>();
 
     //COSAS DURANTE PARTIDA
     private int siguienteIdJugador = 1;
@@ -79,6 +81,7 @@ public class Partida extends ObservableRemoto implements IObservable, IPartida, 
         }
 
         Jugador nuevo = new Jugador(nombreLimpio, siguienteIdJugador++);
+        jugadoresEnPartidaIds.add(nuevo.getIdJugador());
         jugadores.add(nuevo);
         notificacion(EventoEnJuego.JUGADORES_CAMBIOS);
         return nuevo;
@@ -134,6 +137,7 @@ public class Partida extends ObservableRemoto implements IObservable, IPartida, 
         indiceTurno = 0;
         tirosEnTurno = 0;
         apuestaMaximaActual = montoBase;
+        this.faseSoloIgualarOAbandonar = false;
 
         for (Jugador j : participantes) {
             j.prepararParaVuelta(true);         //aportes iniciales, y calls
@@ -146,9 +150,13 @@ public class Partida extends ObservableRemoto implements IObservable, IPartida, 
     }
 
     //TIRAR
-    public synchronized void tirarLosDados(int idJugador){
+    @Override
+    public synchronized void tirarLosDados(int idJugador) {
         validarTurno(idJugador);
-        if(tirosEnTurno >= TirosPorTurno){
+        if (faseSoloIgualarOAbandonar) {
+            throw new IllegalStateException("Hubo una subida: solo podés igualar o abandonar esta ronda con tus dados bloqueados.");
+        }
+        if (tirosEnTurno >= TirosPorTurno) {
             throw new IllegalStateException("Maximo de tiros");
         }
 
@@ -159,13 +167,17 @@ public class Partida extends ObservableRemoto implements IObservable, IPartida, 
     }
 
     //BLOQUERA DADOS
-    public synchronized void bloqueoDeDados(int idJugador, int indiceDado){
+    @Override
+    public synchronized void bloqueoDeDados(int idJugador, int indiceDado) {
         validarTurno(idJugador);
-        if(tirosEnTurno == 0){
+        if (faseSoloIgualarOAbandonar) {
+            throw new IllegalStateException("No podés modificar el bloqueo de dados mientras respondés a una subida.");
+        }
+        if (tirosEnTurno == 0) {
             throw new IllegalStateException("Debes tirar una vez para apartar");
         }
         Jugador actual = getJugadorActual();
-        Dado[] dados = actual.getCubo().getDados();     //como los cubos son privados tengo que llamar
+        Dado[] dados = actual.getCubo().getDados();
 
         if (indiceDado < 0 || indiceDado >= dados.length) {
             throw new IllegalArgumentException("Índice de dado inválido.");
@@ -176,19 +188,23 @@ public class Partida extends ObservableRemoto implements IObservable, IPartida, 
     }
 
     //CALLS, RAISE Y FOLD
+    @Override
     public synchronized void RaiseTrasTirada(int idJugador, int nuevaApuestaTotalVuelta) {
         validarTurno(idJugador);
+        if (faseSoloIgualarOAbandonar) {
+            throw new IllegalStateException("Solo podés igualar o abandonar esta ronda.");
+        }
         if (tirosEnTurno < 1) {
             throw new IllegalStateException("Debés realizar al menos tu primera tirada antes de subir o confirmar apuesta.");
         }
 
         Jugador actual = getJugadorActual();
-        if (nuevaApuestaTotalVuelta < apuestaMaximaActual) {        //solo mas alto que la apuesta actual
-            throw new IllegalArgumentException("apuesta menor a la actual (" + apuestaMaximaActual + ").");
+        if (nuevaApuestaTotalVuelta <= apuestaMaximaActual) {
+            throw new IllegalArgumentException("La subida debe ser mayor a la apuesta actual (" + apuestaMaximaActual + ").");
         }
 
         int diferenciaNecesaria = nuevaApuestaTotalVuelta - actual.getAporteEnVuelta();
-        if (diferenciaNecesaria > actual.getCantidadFichas()) {     //sin fichas no puedo hacer call/raise
+        if (diferenciaNecesaria > actual.getCantidadFichas()) {
             throw new IllegalStateException("Sin fichas suficientes para esa apuesta.");
         }
 
@@ -197,16 +213,40 @@ public class Partida extends ObservableRemoto implements IObservable, IPartida, 
             pozo += diferenciaNecesaria;
         }
 
-        if (nuevaApuestaTotalVuelta > apuestaMaximaActual) {
-            apuestaMaximaActual = nuevaApuestaTotalVuelta;
+        apuestaMaximaActual = nuevaApuestaTotalVuelta;
+
+        // Evaluamos y fijamos la jugada de quien sube
+        if (actual.getUltimaJugada() == null) {
+            ResultadoTirada res = EvaluadorJugadas.evaluar(actual.getCubo().getDados());
+            actual.setUltimaJugada(res);
+            actual.sumarPuntos(res.getPuntaje());
         }
 
         notificacion(EventoEnJuego.APUESTA_ACTUALIZADA);
+        avanzarTurnoTrasSubida();
     }
 
+    private void avanzarTurnoTrasSubida() {
+        List<Jugador> activos = getJugadoresActivosEnVuelta();
+        if (activos.size() <= 1) {
+            nuevoTurno_ResultadoRonda();
+            return;
+        }
+
+        Jugador siguiente = buscarSiguienteJugadorPendiente(activos);
+        if (siguiente != null) {
+            configurarTurnoPara(siguiente);
+            notificacion(EventoEnJuego.CAMBIA_TURNO);
+        } else {
+            faseSoloIgualarOAbandonar = false;
+            resolverRonda();
+        }
+    }
+
+    @Override
     public synchronized void Call_Fold(int idJugador, boolean quiereIgualar) {
         validarTurno(idJugador);
-        if (tirosEnTurno < 1) {
+        if (!faseSoloIgualarOAbandonar && tirosEnTurno < 1) {
             throw new IllegalStateException("Debés realizar al menos tu primera tirada antes de igualar o abandonar.");
         }
 
@@ -220,7 +260,7 @@ public class Partida extends ObservableRemoto implements IObservable, IPartida, 
         }
 
         int faltante = Math.max(0, apuestaMaximaActual - actual.getAporteEnVuelta());
-        if (faltante > actual.getCantidadFichas()) {        //si no puede hacer call abandona
+        if (faltante > actual.getCantidadFichas()) {
             throw new IllegalStateException("Sin fichas para igualar la apuesta actual (" + apuestaMaximaActual + "). Debés abandonar.");
         }
 
@@ -230,17 +270,27 @@ public class Partida extends ObservableRemoto implements IObservable, IPartida, 
             notificacion(EventoEnJuego.APUESTA_ACTUALIZADA);
         }
 
+        if (actual.getUltimaJugada() == null) {
+            ResultadoTirada res = EvaluadorJugadas.evaluar(actual.getCubo().getDados());
+            actual.setUltimaJugada(res);
+            actual.sumarPuntos(res.getPuntaje());
+        }
+
         nuevoTurno_ResultadoRonda();
     }
 
     //ME QUEDO CON MIS DADOS
+    @Override
     public synchronized void plantarse(int idJugador) {
         validarTurno(idJugador);
+        if (faseSoloIgualarOAbandonar) {
+            throw new IllegalStateException("Hubo una subida: solo podés igualar o abandonar esta ronda.");
+        }
         if (tirosEnTurno < 1) {
             throw new IllegalStateException("Debés tirar al menos una vez antes de plantarte.");
         }
 
-        Jugador actual = getJugadorActual();        //si no hace call no se puede plantar
+        Jugador actual = getJugadorActual();
         if (actual.getAporteEnVuelta() < apuestaMaximaActual && actual.getCantidadFichas() > 0) {
             throw new IllegalStateException("Debés igualar la apuesta actual (" + apuestaMaximaActual + ") o abandonar antes de plantarte.");
         }
@@ -251,56 +301,76 @@ public class Partida extends ObservableRemoto implements IObservable, IPartida, 
 
         nuevoTurno_ResultadoRonda();
     }
-
     //HAY JUGADORES POR TIRAR?
     private void nuevoTurno_ResultadoRonda() {
         List<Jugador> activos = getJugadoresActivosEnVuelta();
 
-        // Si solo queda 1 jugador activo (los demás abandonaron), gana el pozo directamente
         if (activos.size() == 1) {
             dadosRevelados = true;
             Jugador unicoGanador = activos.get(0);
             unicoGanador.sumarFichas(pozo);
             pozo = 0;
+            faseSoloIgualarOAbandonar = false;
             verificar_FinPartida_NuevaRonda();
             return;
         }
 
-        Jugador siguiente = buscarSiguienteJugadorPendiente(activos);       //buscoi los que faltan igualar
+        Jugador siguiente = buscarSiguienteJugadorPendiente(activos);
         if (siguiente != null) {
-            indiceTurno = participantesVuelta.indexOf(siguiente);
-            tirosEnTurno = 0;
+            configurarTurnoPara(siguiente);
             notificacion(EventoEnJuego.CAMBIA_TURNO);
         } else {
-
+            faseSoloIgualarOAbandonar = false;
             resolverRonda();
         }
     }
 
+    //SIN ESTO, SI YO TENGO UN RAISE ANTES DE MI MANO NO ME DEJA TIRAR
+    private void configurarTurnoPara(Jugador siguiente) {
+        indiceTurno = participantesVuelta.indexOf(siguiente);
+        tirosEnTurno = 0;
+        boolean todosYaJugaronSuMano = participantesVuelta.stream()
+                .filter(j -> j.isActivoEnVuelta() && jugadoresEnPartidaIds.contains(j.getIdJugador()))
+                .allMatch(j -> j.getUltimaJugada() != null);
+        boolean debeIgualar = siguiente.getAporteEnVuelta() < apuestaMaximaActual && siguiente.getCantidadFichas() > 0;
+        // Solo entra en modo "igualar o abandonar" en la 2da pasada, una vez que todos ya tiraron/jugaron su mano
+        faseSoloIgualarOAbandonar = todosYaJugaronSuMano && debeIgualar;
+    }
+
     private Jugador buscarSiguienteJugadorPendiente(List<Jugador> activos) {
         int total = participantesVuelta.size();
+        boolean todosYaJugaronSuMano = activos.stream()
+                .allMatch(j -> j.getUltimaJugada() != null);
+
         for (int offset = 1; offset <= total; offset++) {
             int candidatoIdx = (indiceTurno + offset) % total;
             Jugador candidato = participantesVuelta.get(candidatoIdx);
-            if (!candidato.isActivoEnVuelta()) {
+            if (!candidato.isActivoEnVuelta() || !jugadoresEnPartidaIds.contains(candidato.getIdJugador())) {
                 continue;
             }
 
-            boolean noEvaluo = candidato.getUltimaJugada() == null; //verifica su apuesta
-            boolean debeIgualar = candidato.getAporteEnVuelta() < apuestaMaximaActual && candidato.getCantidadFichas() > 0;
-            if (noEvaluo || debeIgualar) {
-                return candidato;
+            // 1ra pasada: prioridad a quien todavía no jugó su mano (no tiró/plantó/subió)
+            if (!todosYaJugaronSuMano) {
+                if (candidato.getUltimaJugada() == null) {
+                    return candidato;
+                }
+            } else {
+                // 2da pasada: solo quienes quedaron por debajo de la apuesta máxima actual
+                boolean debeIgualar = candidato.getAporteEnVuelta() < apuestaMaximaActual && candidato.getCantidadFichas() > 0;
+                if (debeIgualar) {
+                    return candidato;
+                }
             }
         }
         return null;
     }
 
     private void resolverRonda() {
-        dadosRevelados = true;      //los que foldearon no
+        dadosRevelados = true;
 
         List<Jugador> competidores = new ArrayList<>();
         for (Jugador j : participantesVuelta) {
-            if (j.isActivoEnVuelta() && j.getAporteEnVuelta() >= apuestaMaximaActual) {
+            if (j.isActivoEnVuelta() && jugadoresEnPartidaIds.contains(j.getIdJugador())) {
                 if (j.getUltimaJugada() == null) {
                     ResultadoTirada res = EvaluadorJugadas.evaluar(j.getCubo().getDados());
                     j.setUltimaJugada(res);
@@ -311,8 +381,7 @@ public class Partida extends ObservableRemoto implements IObservable, IPartida, 
         }
 
         if (competidores.isEmpty()) {
-            // Caso límite: nadie llegó a la apuesta máxima; se reparte o pasa a siguiente ronda
-            nuevoTurno_ResultadoRonda();
+            verificar_FinPartida_NuevaRonda();
             return;
         }
 
@@ -334,10 +403,48 @@ public class Partida extends ObservableRemoto implements IObservable, IPartida, 
             }
             notificacion(EventoEnJuego.RONDA_FINALIZADA);
         } else {
-            //antes faltaba pagar el pozo y avanzar/terminar partida cuando había un solo ganador
-            empatados.get(0).sumarFichas(pozo);
+            Jugador ganadorRonda = empatados.get(0);
+            ganadorRonda.sumarFichas(pozo);
             pozo = 0;
+            verificar_FinPartida_NuevaRonda();
+        }
+    }
+
+    @Override
+    public synchronized void abandonarPartida(int idJugador) {
+        Jugador saliente = getJugadorPorId(idJugador);
+        if (saliente == null) {
+            return;
+        }
+
+        jugadoresEnPartidaIds.remove(idJugador);
+        saliente.abandonarVuelta();
+
+        if (estado == EstadoDePartida.JUGANDO || estado == EstadoDePartida.EMPATE_EN_CURSO) {
+            List<Jugador> restantesEnPartida = jugadores.stream()
+                    .filter(j -> jugadoresEnPartidaIds.contains(j.getIdJugador()))
+                    .toList();
+
+            if (restantesEnPartida.size() == 1) {
+                Jugador ultimoEnPie = restantesEnPartida.get(0);
+                ultimoEnPie.sumarFichas(pozo);
+                pozo = 0;
+                estado = EstadoDePartida.FIN_PARTIDA;
+                notificacion(EventoEnJuego.PARTIDA_FINALIZADA);
+                return;
+            }
+
+            if (restantesEnPartida.isEmpty()) {
+                pozo = 0;
+                estado = EstadoDePartida.FIN_PARTIDA;
+                notificacion(EventoEnJuego.PARTIDA_FINALIZADA);
+                return;
+            }
+
+            notificacion(EventoEnJuego.JUGADOR_ABANDONO);
             nuevoTurno_ResultadoRonda();
+        } else {
+            notificacion(EventoEnJuego.JUGADORES_CAMBIOS);
         }
     }
 
@@ -376,11 +483,15 @@ public class Partida extends ObservableRemoto implements IObservable, IPartida, 
 
     //VERIFICA SI HAY MAS DE 1 JUGADOR CON FICHAS
     private void verificar_FinPartida_NuevaRonda() {
-        long jugadoresConFichas = jugadores.stream()
+        List<Jugador> restantes = jugadores.stream()
+                .filter(j -> jugadoresEnPartidaIds.contains(j.getIdJugador()))
+                .toList();
+
+        long jugadoresConFichas = restantes.stream()
                 .filter(j -> j.getCantidadFichas() > 0)
                 .count();
 
-        if (jugadores.size() > 1 && jugadoresConFichas <= 1) {
+        if (restantes.size() <= 1 || (jugadores.size() > 1 && jugadoresConFichas <= 1)) {
             estado = EstadoDePartida.FIN_PARTIDA;
             notificacion(EventoEnJuego.PARTIDA_FINALIZADA);
         } else {
@@ -403,6 +514,12 @@ public class Partida extends ObservableRemoto implements IObservable, IPartida, 
         if (!actual.isActivoEnVuelta()) {
             throw new IllegalStateException("Ya abandonaste esta ronda.");
         }
+    }
+
+    //ME BLOQUE OTODO MENOS IGUALAR O ABANDONAR LUEGO DE MIS TIROS SI HAY APUESTA MAS ALTA
+    @Override
+    public boolean isSoloIgualarOAbandonar() {
+        return faseSoloIgualarOAbandonar;
     }
 
     //GETTERS / SETTERS

@@ -175,10 +175,28 @@ public class Controlador implements IControladorRemoto {
         }
     }
 
+    public boolean isSoloIgualarOAbandonar() {
+        try {
+            if (modelo == null) return false;
+            return modelo.isSoloIgualarOAbandonar();
+        } catch (RemoteException e) {
+            if (vista != null) vista.mostrarError(e.getMessage());
+            return false;
+        }
+    }
+
     public void abandonarPartida() {
-        this.idJugadorLocal = null;
-        if (vista != null) {
-            vista.mostrarMenu();
+        try {
+            if (modelo != null && idJugadorLocal != null) {
+                modelo.abandonarPartida(idJugadorLocal);
+            }
+        } catch (RemoteException e) {
+            if (vista != null) vista.mostrarError(e.getMessage());
+        } finally {
+            this.idJugadorLocal = null;
+            if (vista != null) {
+                vista.mostrarMenu();
+            }
         }
     }
 }

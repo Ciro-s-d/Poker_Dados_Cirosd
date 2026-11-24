@@ -21,4 +21,6 @@ public interface IPartida extends IObservableRemoto {
     Dado[] getDadosVisibles(int idJugadorConsulta) throws RemoteException;
     boolean isDadosRevelados() throws RemoteException;
     int getTirosEnTurno() throws RemoteException;
+    void abandonarPartida(int idJugador) throws RemoteException;
+    boolean isSoloIgualarOAbandonar() throws RemoteException;
 }
