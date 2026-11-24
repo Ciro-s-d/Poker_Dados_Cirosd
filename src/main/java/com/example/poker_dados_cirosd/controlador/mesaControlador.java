@@ -10,6 +10,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.image.Image;
 
 import java.util.List;
 
@@ -146,10 +147,17 @@ public class mesaControlador {
         for (int i = 0; i < tarjetasJugadores.length; i++) {
             HBox tarjeta = tarjetasJugadores[i];
             if (tarjeta == null) continue;
-
             if (jugadores != null && i < jugadores.size()) {
                 Jugador j = jugadores.get(i);
                 setVisibleManaged(tarjeta, true);
+
+                if (imagenesJugadores != null && i < imagenesJugadores.length && imagenesJugadores[i] != null) {
+                    int numPersonaje = ((Math.max(1, j.getIdJugador()) - 1) % 4) + 1;
+                    var urlAvatar = getClass().getResource("/img/personajes/personaje_" + numPersonaje + ".jpg");
+                    if (urlAvatar != null) {
+                        imagenesJugadores[i].setImage(new javafx.scene.image.Image(urlAvatar.toExternalForm()));
+                    }
+                }
 
                 if (labelsNombre[i] != null) labelsNombre[i].setText("Nombre: " + j.getnombreJugador());
                 if (labelsFichas[i] != null) labelsFichas[i].setText("Fichas: " + j.getCantidadFichas());
@@ -158,8 +166,8 @@ public class mesaControlador {
 
                 boolean tieneTurno = (j.equals(jugadorActual));
                 tarjeta.setStyle(tieneTurno
-                        ? "-fx-background-color: #8c8c8c; -fx-border-color: #ffd700; -fx-border-width: 2;"
-                        : "-fx-background-color: #808080;");
+                        ? "-fx-background-color: rgba(54, 20, 32, 0.94); -fx-background-radius: 10; -fx-border-color: #ffd54f; -fx-border-width: 2; -fx-border-radius: 10; -fx-padding: 5;"
+                        : "-fx-background-color: rgba(36, 15, 22, 0.86); -fx-background-radius: 10; -fx-border-color: rgba(212, 175, 55, 0.45); -fx-border-width: 1.5; -fx-border-radius: 10; -fx-padding: 5;");
             } else {
                 // Si hay menos de 4 jugadores oculta las tarjetas que sobran
                 setVisibleManaged(tarjeta, false);
@@ -171,20 +179,35 @@ public class mesaControlador {
         for (int i = 0; i < botonesDados.length; i++) {
             Button btn = botonesDados[i];
             if (btn == null) continue;
-
             if (dadosVisibles != null && i < dadosVisibles.length && dadosVisibles[i] != null) {
                 Dado d = dadosVisibles[i];
                 int valor = d.getValor();
                 boolean bloqueado = d.estaBloqueado();
 
-                String textoDado = (dadosRevelados || esMiTurno) ? String.valueOf(valor) : "?";
-                btn.setText(bloqueado ? textoDado + " [BLOQ]" : textoDado);
-                btn.setDisable(!esMiTurno);
+                if (dadosRevelados || esMiTurno) {
+                    var url = getClass().getResource("/img/objetos/dado_" + valor + ".png");
+                    if (url != null) {
+                        ImageView iv = new ImageView(new Image(url.toExternalForm()));
+                        iv.setFitWidth(66);
+                        iv.setFitHeight(66);
+                        iv.setPreserveRatio(true);
+                        btn.setGraphic(iv);
+                        btn.setText("");
+                    } else {
+                        btn.setGraphic(null);
+                        btn.setText(String.valueOf(valor));
+                    }
+                } else {
+                    btn.setGraphic(null);
+                    btn.setText("?");
+                }
 
+                btn.setDisable(!esMiTurno);
                 btn.setStyle(bloqueado
-                        ? "-fx-border-color: #d9534f; -fx-border-width: 2; -fx-background-color: #ffe6e6;"
-                        : "-fx-border-color: #2e7d32; -fx-border-width: 1;");
+                        ? "-fx-background-color: rgba(255, 82, 82, 0.25); -fx-border-color: #ff5252; -fx-border-width: 2; -fx-background-radius: 10; -fx-border-radius: 10; -fx-background-insets: 0; -fx-border-insets: 0; -fx-padding: 0;"
+                        : "-fx-background-color: transparent; -fx-border-color: transparent; -fx-background-insets: 0; -fx-border-insets: 0; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-padding: 0;");
             } else {
+                btn.setGraphic(null);
                 btn.setText("DADO " + (i + 1));
                 btn.setDisable(true);
             }

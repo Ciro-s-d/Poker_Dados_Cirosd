@@ -4,6 +4,7 @@ import com.example.poker_dados_cirosd.modelo.Jugador;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 import java.util.Comparator;
@@ -39,7 +40,13 @@ public class finPartidaControlador {
         if (lblFichasGanador != null) {
             lblFichasGanador.setText("Fichas: " + ganador.getCantidadFichas());
         }
-
+        if (imgGanador != null) {
+            int numPersonaje = ((Math.max(1, ganador.getIdJugador()) - 1) % 4) + 1;
+            var urlAvatar = getClass().getResource("/img/personajes/personaje_" + numPersonaje + ".jpg");
+            if (urlAvatar != null) {
+                imgGanador.setImage(new Image(urlAvatar.toExternalForm()));
+            }
+        }
     }
 
     @FXML

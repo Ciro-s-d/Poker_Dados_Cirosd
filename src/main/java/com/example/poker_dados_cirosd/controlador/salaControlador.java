@@ -4,10 +4,7 @@ import com.example.poker_dados_cirosd.modelo.Jugador;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 
@@ -43,10 +40,42 @@ public class salaControlador {
         if (colId != null) {
             colId.setCellValueFactory(cellData ->
                     new SimpleObjectProperty<>(cellData.getValue().getIdJugador()));
+            colId.setCellFactory(col -> new TableCell<>() {
+                @Override
+                protected void updateItem(Object item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty || item == null ? null : item.toString());
+                    setStyle("-fx-background-color: transparent; -fx-text-fill: #2b1d0e; -fx-font-weight: bold; -fx-alignment: CENTER; -fx-border-color: transparent #a1887f transparent transparent; -fx-border-width: 0 1 0 0;");
+                }
+            });
         }
+
         if (colNombre != null) {
             colNombre.setCellValueFactory(cellData ->
                     new SimpleStringProperty(cellData.getValue().getnombreJugador()));
+            colNombre.setCellFactory(col -> new TableCell<>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty || item == null ? null : item);
+                    setStyle("-fx-background-color: transparent; -fx-text-fill: #2b1d0e; -fx-font-weight: bold; -fx-padding: 0 0 0 10; -fx-border-color: transparent;");
+                }
+            });
+        }
+
+        if (tablaJugadores != null) {
+            tablaJugadores.setRowFactory(tv -> new TableRow<>() {
+                @Override
+                protected void updateItem(Jugador item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setPrefHeight(28);
+                    if (empty || item == null) {
+                        setStyle("-fx-background-color: transparent;");
+                    } else {
+                        setStyle("-fx-background-color: rgba(255, 248, 225, 0.25); -fx-border-color: transparent transparent #8d6e4c transparent; -fx-border-width: 0 0 1 0;");
+                    }
+                }
+            });
         }
     }
 
