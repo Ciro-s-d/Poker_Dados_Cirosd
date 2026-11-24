@@ -20,6 +20,7 @@ classDiagram
             +getApuestaMaximaActual() int
             +getDadosVisibles(idJugadorConsulta) Dado[]
             +isDadosRevelados() boolean
+            +getTirosEnTurno() int
         }
 
         class Partida {
@@ -38,6 +39,7 @@ classDiagram
             +plantarse(idJugador)
             +solucionEmpate(idJugador, quiereRepartir)
             +getDadosVisibles(idJugadorConsulta) Dado[]
+            +getTirosEnTurno() int
         }
 
         class Jugador {
@@ -111,6 +113,8 @@ classDiagram
             +igualarOAbandonar(quiereIgualar)
             +plantarse()
             +resolverEmpate(quiereRepartir)
+            +abandonarPartida()
+            +getTirosEnTurno() int
             +actualizar(observable, arg)
         }
 
@@ -199,6 +203,7 @@ classDiagram
         }
     }
 
+    Launcher --> HelloApplication : lanza
     IPartida <|.. Partida : implements
     Partida *-- Jugador : contiene 1..N
     Jugador *-- Cubo : posee 1
