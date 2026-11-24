@@ -10,39 +10,57 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<StackPane alignment="CENTER" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.poker_dados_cirosd.controlador.menuControlador">
+<StackPane alignment="CENTER"
+           style="-fx-background-color: #eceff1;"
+           xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.example.poker_dados_cirosd.controlador.menuControlador">
    <children>
-      <AnchorPane maxHeight="652.0" maxWidth="913.0" minHeight="652.0" minWidth="913.0" prefHeight="652.0" prefWidth="913.0">
+      <AnchorPane maxHeight="652.0" maxWidth="913.0" minHeight="652.0" minWidth="913.0" prefHeight="652.0" prefWidth="913.0"
+                  style="-fx-background-color: #ffffff; -fx-background-radius: 16; -fx-border-color: #cfd8dc; -fx-border-radius: 16; -fx-border-width: 1.5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 18, 0, 0, 4);">
          <children>
-            <Button fx:id="btn_Jugar" layoutX="411.0" layoutY="337.0" mnemonicParsing="false" onAction="#onJugar" prefHeight="25.0" prefWidth="66.0" text="Jugar" />
-            <Label fx:id="lbl_Titulo" layoutX="339.0" layoutY="227.0" prefHeight="60.0" prefWidth="236.0" text="POKER DE DADOS" textAlignment="CENTER" textFill="#111111">
+            <Label fx:id="lbl_Titulo" alignment="CENTER" layoutX="216.0" layoutY="155.0" prefHeight="76.0" prefWidth="480.0"
+                   text="PÓKER DE DADOS" textAlignment="CENTER" textFill="#1b3b2b">
                <font>
-                  <Font name="Yu Gothic UI Semibold" size="28.0" />
+                  <Font name="Georgia Bold" size="42.0" />
                </font>
             </Label>
-            <Button fx:id="btn_Salir" layoutX="411.0" layoutY="400.0" mnemonicParsing="false" onAction="#onSalir" prefHeight="25.0" prefWidth="66.0" text="Salir" />
 
+            <Button fx:id="btn_Jugar" layoutX="356.0" layoutY="285.0" mnemonicParsing="false" onAction="#onJugar"
+                    prefHeight="46.0" prefWidth="200.0"
+                    style="-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-cursor: hand;"
+                    text="Jugar" />
 
-            <VBox fx:id="vboxAnteSala" alignment="CENTER" layoutX="322.0" layoutY="218.0" prefHeight="238.0" prefWidth="270.0" spacing="5.0" style="-fx-background-color: white;">
+            <Button fx:id="btn_Salir" layoutX="356.0" layoutY="352.0" mnemonicParsing="false" onAction="#onSalir"
+                    prefHeight="42.0" prefWidth="200.0"
+                    style="-fx-background-color: #eceff1; -fx-text-fill: #37474f; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 10; -fx-border-color: #b0bec5; -fx-border-radius: 10; -fx-cursor: hand;"
+                    text="Salir" />
+
+            <VBox fx:id="vboxAnteSala" alignment="CENTER" layoutX="286.0" layoutY="225.0" prefHeight="260.0" prefWidth="340.0" spacing="14.0"
+                  style="-fx-background-color: #ffffff; -fx-background-radius: 14; -fx-border-color: #b0bec5; -fx-border-radius: 14; -fx-border-width: 1.5; -fx-padding: 24; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.16), 16, 0, 0, 4);">
                <children>
-                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Ingresa tu Nombre:">
-                     <VBox.margin>
-                        <Insets right="90.0" />
-                     </VBox.margin>
+                  <Text fill="#263238" strokeType="OUTSIDE" strokeWidth="0.0" text="Ingresá tu nombre">
                      <font>
-                        <Font name="Arial" size="13.0" />
+                        <Font name="System Bold" size="16.0" />
                      </font>
                   </Text>
-                  <TextField fx:id="txtNombreJugador" promptText="Ingresa tu nombre:">
+
+                  <TextField fx:id="txtNombreJugador" prefHeight="38.0" prefWidth="260.0" promptText="Tu nombre de jugador..."
+                             style="-fx-background-radius: 8; -fx-border-color: #90a4ae; -fx-border-radius: 8; -fx-padding: 6 12 6 12; -fx-font-size: 14px;">
                      <VBox.margin>
-                        <Insets bottom="45.0" left="30.0" right="30.0" />
+                        <Insets bottom="6.0" left="10.0" right="10.0" />
                      </VBox.margin>
                   </TextField>
-                  <Button fx:id="btn_Unirse" contentDisplay="TOP" mnemonicParsing="false" onAction="#onUnirse" text="Unirse">
-                     <VBox.margin>
-                        <Insets bottom="25.0" />
-                     </VBox.margin></Button>
-                  <Button fx:id="btn_Atras" mnemonicParsing="false" onAction="#onAtras" text="Atras" />
+
+                  <Button fx:id="btn_Unirse" contentDisplay="TOP" mnemonicParsing="false" onAction="#onUnirse"
+                          prefHeight="40.0" prefWidth="200.0"
+                          style="-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;"
+                          text="Unirse" />
+
+                  <Button fx:id="btn_Atras" mnemonicParsing="false" onAction="#onAtras"
+                          prefHeight="36.0" prefWidth="200.0"
+                          style="-fx-background-color: #f5f5f5; -fx-text-fill: #455a64; -fx-font-size: 13px; -fx-background-radius: 8; -fx-border-color: #cfd8dc; -fx-border-radius: 8; -fx-cursor: hand;"
+                          text="Atrás" />
                </children>
             </VBox>
          </children>
